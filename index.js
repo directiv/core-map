@@ -2,7 +2,8 @@
  * Module dependencies
  */
 
-var mori = require('mori');
+var update = require('react/addons').addons.update;
+var hash = require('object-hash');
 
 /**
  * Expose the DirectivMap constructor
@@ -18,7 +19,7 @@ module.exports = exports = DirectivMap;
 
 function DirectivMap(init) {
   if (!(this instanceof DirectivMap)) return new DirectivMap(init);
-  this._value = init || mori.hash_map();
+  this._value = init || {};
 };
 
 /**
@@ -30,11 +31,8 @@ function DirectivMap(init) {
  */
 
 DirectivMap.prototype.get = function(key, defaultValue) {
-  if (arguments.length === 0) return mori.clj_to_js(this._value);
-  var value = get(this._value, key, defaultValue);
-  if (typeof value !== 'object') return value;
-  if (!value) return value;
-  return new DirectivMap(value);
+  if (arguments.length === 0) return this._value;
+  return get(this._value, key, defaultValue);
 };
 
 /**
@@ -46,8 +44,12 @@ DirectivMap.prototype.get = function(key, defaultValue) {
  */
 
 DirectivMap.prototype.set = function(key, value) {
-  if (typeof value === 'object' && !mori.is_collection(value)) value = mori.js_to_clj(value);
-  return new DirectivMap(mori.assoc(this._value, key, value));
+  var commit = key;
+  if (typeof key === 'string') {
+    commit = {};
+    commit[key] = {$set: value};
+  }
+  return new DirectivMap(update(this._value, commit));
 };
 
 /**
@@ -58,13 +60,19 @@ DirectivMap.prototype.set = function(key, value) {
  */
 
 DirectivMap.prototype.equals = function(coll) {
-  return mori.equals(this._value, coll);
+  if (!this._hash) this._hash = hash(this, opts);
+  if (!coll._hash) coll._hash = hash(coll, opts);
+  return this._hash === coll._hash;
+};
+var opts = {
+  algorithm: 'sha1',
+  encoding: 'base64'
 };
 
 /**
  * Follow a path and return a value
  *
- * @param {MoriCollection} value
+ * @param {Object|Array} value
  * @param {String} key
  * @param {Any?} defaultValue
  * @return {Any}
@@ -75,6 +83,6 @@ function get(value, key, defaultValue) {
   var parts = key.split('.');
   return parts.reduce(function(val, part) {
     if (!val) return val;
-    return mori.get(val, part);
+    return val[part];
   }, value) || defaultValue;
 }
