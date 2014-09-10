@@ -1,4 +1,4 @@
-core-structure
-==============
+core-map
+========
 
-immutable data structures
+simple immutable maps

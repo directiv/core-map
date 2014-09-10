@@ -1,9 +1,9 @@
 var should = require('should');
-var Data = require('../');
+var CoreMap = require('../');
 
-describe('core-structure', function() {
+describe('core-map', function() {
   it('should work', function() {
-    var data = Data();
+    var data = CoreMap();
     data.get().should.eql({});
     should.not.exist(data.get('key'));
     var data2 = data.set('key', 123);

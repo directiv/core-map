@@ -1,26 +1,26 @@
 {
-  "name": "directiv-core-structure",
+  "name": "directiv-core-map",
   "version": "0.1.0",
-  "description": "immutable data structures",
+  "description": "simple immutable maps",
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/directiv/core-structure.git"
+    "url": "https://github.com/directiv/core-map.git"
   },
   "author": "Cameron Bytheway <bytheway.cameron@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/directiv/core-structure/issues"
+    "url": "https://github.com/directiv/core-map/issues"
   },
-  "homepage": "https://github.com/directiv/core-structure",
+  "homepage": "https://github.com/directiv/core-map",
+  "dependencies": {
+    "mori": "^0.2.9"
+  },
   "devDependencies": {
     "mocha": "^1.21.4",
     "should": "^4.0.4"
-  },
-  "dependencies": {
-    "mori": "^0.2.9"
   }
 }
