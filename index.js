@@ -2,8 +2,8 @@
  * Module dependencies
  */
 
-var update = require('react/addons').addons.update;
-var hash = require('object-hash');
+var Immutable = require('immutable').Map;
+var inherit = require('util').inherits;
 
 /**
  * Expose the DirectivMap constructor
@@ -17,10 +17,10 @@ module.exports = exports = DirectivMap;
  * @param {MoriCollection} init
  */
 
-function DirectivMap(init) {
-  if (!(this instanceof DirectivMap)) return new DirectivMap(init);
-  this._value = init || {};
+function DirectivMap(obj) {
+  return Immutable.call(this, obj);
 };
+inherit(DirectivMap, Immutable);
 
 /**
  * Get a key or the whole value
@@ -30,59 +30,20 @@ function DirectivMap(init) {
  * @return {DirectiveMap}
  */
 
-DirectivMap.prototype.get = function(key, defaultValue) {
-  if (arguments.length === 0) return this._value;
-  return get(this._value, key, defaultValue);
+DirectivMap.prototype.getIn = function(searchKeyPath, defaultValue) {
+  if (!searchKeyPath || searchKeyPath.length === 0) return this;
+  return getInDeepSequence(this, searchKeyPath, defaultValue, 0);
 };
 
-/**
- * Associate a key and value
- *
- * @param {String} key
- * @param {Any} value
- * @return {DirectiveMap}
- */
-
-DirectivMap.prototype.set = function(key, value) {
-  var commit = key;
-  if (typeof key === 'string') {
-    commit = {};
-    commit[key] = {$set: value};
+var NOT_SET = {};
+function getInDeepSequence(seq, keyPath, notSetValue, pathOffset) {
+  var key = keyPath[pathOffset];
+  var nested = seq.get ? seq.get(keyPath[pathOffset], NOT_SET) : (seq[key] || NOT_SET);
+  if (nested === NOT_SET) {
+    return notSetValue;
   }
-  return new DirectivMap(update(this._value, commit));
-};
-
-/**
- * Check equality of two maps
- *
- * @param {DirectiveMap}
- * @return {Boolean}
- */
-
-DirectivMap.prototype.equals = function(coll) {
-  if (!this._hash) this._hash = hash(this, opts);
-  if (!coll._hash) coll._hash = hash(coll, opts);
-  return this._hash === coll._hash;
-};
-var opts = {
-  algorithm: 'sha1',
-  encoding: 'base64'
-};
-
-/**
- * Follow a path and return a value
- *
- * @param {Object|Array} value
- * @param {String} key
- * @param {Any?} defaultValue
- * @return {Any}
- */
-
-function get(value, key, defaultValue) {
-  if (key === '') return null;
-  var parts = key.split('.');
-  return parts.reduce(function(val, part) {
-    if (!val) return val;
-    return val[part];
-  }, value) || defaultValue;
+  if (++pathOffset === keyPath.length) {
+    return nested;
+  }
+  return getInDeepSequence(nested, keyPath, notSetValue, pathOffset);
 }
